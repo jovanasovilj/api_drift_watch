@@ -7,7 +7,12 @@ defmodule DriftWatchWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {DriftWatchWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    # Everything comes from this app and nothing runs inline. That is why the theme script in
+    # the root layout is a file of its own.
+    plug :put_secure_browser_headers, %{
+      "content-security-policy" =>
+        "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    }
   end
 
   pipeline :api do
@@ -20,10 +25,12 @@ defmodule DriftWatchWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", DriftWatchWeb do
-  #   pipe_through :api
-  # end
+  scope "/drifty", DriftWatchWeb do
+    pipe_through :api
+
+    get "/openapi.json", DriftyController, :spec
+    get "/stations/:id", DriftyController, :station
+  end
 
   # Enable LiveDashboard in development
   if Application.compile_env(:drift_watch, :dev_routes) do

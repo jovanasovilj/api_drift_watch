@@ -1,0 +1,96 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Drifty Weather Stations",
+    "version": "1.0.0",
+    "description": "A small demo API that breaks its own spec on purpose, so API Drift Watch always has something to show."
+  },
+  "paths": {
+    "/drifty/stations/{id}": {
+      "get": {
+        "operationId": "getStation",
+        "summary": "Get one weather station",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "drift",
+            "in": "query",
+            "required": false,
+            "description": "Forces one kind of drift. Without it the API picks one at random.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "none",
+                "missing_field",
+                "wrong_type",
+                "unexpected_null",
+                "extra_field",
+                "invalid_value",
+                "undocumented_status"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The station",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Station" }
+              }
+            }
+          },
+          "404": {
+            "description": "No station with this id",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Station": {
+        "type": "object",
+        "required": ["id", "name", "status", "location", "temperature_c", "tags", "operator", "updated_at"],
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Utrecht De Bilt" },
+          "status": { "type": "string", "enum": ["online", "offline"] },
+          "location": { "$ref": "#/components/schemas/Location" },
+          "temperature_c": { "type": "number", "example": 12.4 },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "operator": {
+            "type": ["string", "null"],
+            "description": "Null when the station has no operator."
+          },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "required": ["lat", "lon"],
+        "properties": {
+          "lat": { "type": "number" },
+          "lon": { "type": "number" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

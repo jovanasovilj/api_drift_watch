@@ -19,15 +19,16 @@ defmodule DriftWatchWeb.ConnCase do
 
   using do
     quote do
-      # The default endpoint for testing
-      @endpoint DriftWatchWeb.Endpoint
-
       use DriftWatchWeb, :verified_routes
+
+      import DriftWatchWeb.ConnCase
+      import Phoenix.ConnTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
-      import DriftWatchWeb.ConnCase
+
+      # The default endpoint for testing
+      @endpoint DriftWatchWeb.Endpoint
     end
   end
 

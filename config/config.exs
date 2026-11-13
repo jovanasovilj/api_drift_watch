@@ -7,10 +7,6 @@
 # General application configuration
 import Config
 
-config :drift_watch,
-  ecto_repos: [DriftWatch.Repo],
-  generators: [timestamp_type: :utc_datetime]
-
 # Configure the endpoint
 config :drift_watch, DriftWatchWeb.Endpoint,
   url: [host: "localhost"],
@@ -22,20 +18,32 @@ config :drift_watch, DriftWatchWeb.Endpoint,
   pubsub_server: DriftWatch.PubSub,
   live_view: [signing_salt: "F2SFL4rm"]
 
-# Configure LiveView
-config :phoenix_live_view,
-  # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.
-  root_tag_attribute: "phx-r"
+config :drift_watch,
+  ecto_repos: [DriftWatch.Repo],
+  generators: [timestamp_type: :utc_datetime]
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
   drift_watch: [
     args:
-      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
+      ~w(js/app.js js/theme.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
+
+# Configure Elixir's Logger
+config :logger, :default_formatter,
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id]
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
+# Configure LiveView
+config :phoenix_live_view,
+  # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.
+  root_tag_attribute: "phx-r"
 
 # Configure tailwind (the version is required)
 config :tailwind,
@@ -48,14 +56,6 @@ config :tailwind,
     cd: Path.expand("..", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
-
-# Configure Elixir's Logger
-config :logger, :default_formatter,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
-
-# Use Jason for JSON parsing in Phoenix
-config :phoenix, :json_library, Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -20,16 +20,19 @@ config :drift_watch, DriftWatchWeb.Endpoint,
   secret_key_base: "V7Y6IEpJVVJOqeUSTjF22HxpKwQW0p9GbPcQsu0XRcF26ZnCjpuXzDu4hTAl986b",
   server: false
 
+# Route every outgoing request to Req.Test stubs
+config :drift_watch, req_options: [plug: {Req.Test, DriftWatch.HTTP}]
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-# Enable helpful, but potentially expensive runtime checks
-config :phoenix_live_view,
-  enable_expensive_runtime_checks: true
-
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Enable helpful, but potentially expensive runtime checks
+config :phoenix_live_view,
+  enable_expensive_runtime_checks: true

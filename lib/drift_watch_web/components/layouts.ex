@@ -1,7 +1,6 @@
 defmodule DriftWatchWeb.Layouts do
   @moduledoc """
-  This module holds layouts and related functionality
-  used by your application.
+  The page layouts: the HTML skeleton in `layouts/root.html.heex` and the app shell below.
   """
   use DriftWatchWeb, :html
 
@@ -35,37 +34,22 @@ defmodule DriftWatchWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://phoenix.hexdocs.pm/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+    <header class="border-b border-base-300">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <.link navigate={~p"/"} class="flex items-center gap-2 font-semibold">
+          <.icon name="hero-signal" class="size-5 text-primary" /> API Drift Watch
+        </.link>
+        <div class="flex items-center gap-4 text-sm">
+          <a href={~p"/drifty/openapi.json"} class="link link-hover text-base-content/70">
+            Drifty spec
+          </a>
+          <.theme_toggle />
+        </div>
+      </nav>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
+    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {render_slot(@inner_block)}
     </main>
 
     <.flash_group flash={@flash} />

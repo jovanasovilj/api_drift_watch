@@ -20,6 +20,9 @@ config :drift_watch, DriftWatchWeb.Endpoint,
   secret_key_base: "V7Y6IEpJVVJOqeUSTjF22HxpKwQW0p9GbPcQsu0XRcF26ZnCjpuXzDu4hTAl986b",
   server: false
 
+# Jobs only run when a test asks for it
+config :drift_watch, Oban, testing: :manual
+
 # Route every outgoing request to Req.Test stubs
 config :drift_watch, req_options: [plug: {Req.Test, DriftWatch.HTTP}]
 

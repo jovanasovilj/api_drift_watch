@@ -22,7 +22,8 @@ defmodule DriftWatchWeb.Router do
   scope "/", DriftWatchWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", DashboardLive
+    live "/checks/:id", CheckLive
   end
 
   scope "/drifty", DriftWatchWeb do

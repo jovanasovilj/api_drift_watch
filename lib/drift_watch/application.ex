@@ -12,8 +12,7 @@ defmodule DriftWatch.Application do
       DriftWatch.Repo,
       {DNSCluster, query: Application.get_env(:drift_watch, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: DriftWatch.PubSub},
-      # Start a worker by calling: DriftWatch.Worker.start_link(arg)
-      # {DriftWatch.Worker, arg},
+      {Oban, Application.fetch_env!(:drift_watch, Oban)},
       # Start to serve requests, typically the last entry
       DriftWatchWeb.Endpoint
     ]

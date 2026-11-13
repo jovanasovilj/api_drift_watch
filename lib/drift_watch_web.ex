@@ -84,6 +84,7 @@ defmodule DriftWatchWeb do
 
       # Core UI components
       import DriftWatchWeb.CoreComponents
+      import DriftWatchWeb.DriftComponents
 
       # HTML escaping functionality
       import Phoenix.HTML

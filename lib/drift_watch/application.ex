@@ -13,6 +13,7 @@ defmodule DriftWatch.Application do
       {DNSCluster, query: Application.get_env(:drift_watch, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: DriftWatch.PubSub},
       {Oban, Application.fetch_env!(:drift_watch, Oban)},
+      DriftWatch.Sandbox,
       # Start to serve requests, typically the last entry
       DriftWatchWeb.Endpoint
     ]

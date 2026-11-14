@@ -2,6 +2,8 @@
 
 API docs say one thing and the API does another. API Drift Watch calls real endpoints on a schedule and compares every response with the OpenAPI spec. A live dashboard shows where they drift apart: missing fields, wrong types, unexpected nulls, invalid values, undocumented status codes and fields the spec never mentions.
 
+To check your own API without setting anything up, paste its spec and a response on the compare page.
+
 It is built with Elixir, Phoenix LiveView, Oban and PostgreSQL.
 
 ![Dashboard](docs/dashboard.png)
@@ -56,6 +58,12 @@ Next to the public APIs the app watches the drifty API that ships with it: a sma
 
 ![Check detail](docs/check.png)
 
+## Compare your own spec
+
+Open http://localhost:4000/compare and paste an OpenAPI 3.1 spec (JSON or YAML) and a response body. Pick the operation and the status code and the page lists every drift. It runs the same checker as the watched APIs. Nothing is fetched and nothing is stored, so it also works for private APIs the server could never reach. Press Try the example to load the drifty spec with a response that has five drifts.
+
+![Compare page](docs/compare.png)
+
 ## How it works
 
 ```
@@ -75,6 +83,8 @@ Oban cron, every minute
 | `DriftWatch.Checker.SchemaErrors` | maps validator errors to drift kinds |
 | `DriftWatch.Checker.ExtraFields` | finds fields the schema never mentions |
 | `DriftWatch.Monitoring` | the context for APIs, checks, runs and drift history |
+| `DriftWatch.Comparison` | the compare page: size limits, parsing and comparing a pasted spec and response |
+| `DriftWatch.Sandbox` | runs work on untrusted input in a process with a memory cap and a time limit |
 | `DriftWatch.Workers.*` | the scheduler and the check runner |
 | `DriftWatch.Drifty` | the demo API that breaks its own spec |
 
@@ -109,6 +119,16 @@ Oban cron, every minute
 * A base URI. Petstore 3.1 references schemas by a relative `$id` like `/api/v31/components/schemas/petdetails`, which JSV can only place when the document has an absolute `$id`. OpenAPI 3.1 says relative references resolve against the URL the spec was loaded from, so that URL becomes the `$id`.
 * Keeping big specs out of page loads. GitHub's spec is 14 MB, so the `spec` column is not loaded by normal queries and is only read when a check runs. The dashboard stays at a few milliseconds.
 
+**Pasted specs run in a sandbox.** Anyone can paste a spec on the compare page, so it is untrusted input. Three things could go wrong and each has its own limit:
+
+* Size. Specs and bodies over 1 MB are refused before parsing.
+* Memory. YAML aliases can point at other aliases. Less than 1 KB of nested aliases expands to a billion strings. The BEAM can cap the heap of one process, so parsing and comparing run in a separate process with a 128 MB cap. When it grows past that the process is killed and the page shows an error. The page itself keeps running.
+* Time. A schema can hold a regex that takes forever. The work gets 5 seconds.
+
+At most 4 of these processes run at the same time, so the worst case for the whole node is about half a GB. I measured the limits first: the 318 KB PokeAPI YAML spec needs between 16 and 32 MB to parse.
+
+**Specs never create atoms.** Atoms are never garbage collected, so creating them from outside input can eventually crash the node. JSV has its own `x-jsv-cast` keyword that turns validated strings into atoms. A spec could use it to turn every response value into a new atom. The checker builds schemas with `atoms: false` and validates with `cast: false`. A test makes sure such a spec creates no atom. A malformed `x-jsv-cast` also made JSV raise instead of returning an error, so the checker turns that into an invalid schema result.
+
 **A strict Content Security Policy.** Everything loads from the app itself and nothing runs inline. The theme script that Phoenix puts inline in the layout is a separate file for that reason.
 
 ## Quality checks
@@ -125,6 +145,7 @@ GitHub Actions runs all of them on every push. Formatting uses Styler.
 
 * Only OpenAPI 3.1 and 3.2. Specs in 3.0 use `nullable` and need a conversion step.
 * References to other files are not followed. References by `$id` inside the spec work for validation, but the extra field check skips the schemas it can only reach that way.
-* Specs come from URLs the operator sets up, so there is no size limit or protection against YAML alias bombs yet. Both would matter before users could add their own APIs.
+* Watched specs come from URLs the operator sets up in the seeds, so they are parsed without the sandbox and without a size limit.
 * Response headers and content types are not compared yet.
 * There is no UI to add an API or a check yet. The seeds add them.
+* Watch mode for your own APIs is the next big step: add an API and its checks in the UI and let the scheduler run them. Most of it exists already. What it needs on top is a block on private and local addresses, so nobody can make the server call its own network (SSRF). It also needs a limit on how often each check runs and the sandbox around spec downloads.

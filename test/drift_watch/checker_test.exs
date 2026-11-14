@@ -197,4 +197,29 @@ defmodule DriftWatch.CheckerTest do
       assert Checker.run(@api, check) == {:error, :unknown_operation}
     end
   end
+
+  describe "compare/4 with a spec from a stranger" do
+    test "never turns response strings into atoms" do
+      # JSV can cast validated strings to atoms through its own schema keyword.
+      schema = %{"type" => "string", "x-jsv-cast" => [["Elixir.JSV.Cast", "string_to_atom"]]}
+      spec = %{"openapi" => "3.1.0", "paths" => %{"/x" => %{"get" => response(schema)}}}
+      {:ok, operation} = Specs.operation(spec, "get", "/x")
+      value = "drift_watch_atom_#{System.unique_integer([:positive])}"
+
+      assert Checker.compare(spec, operation, 200, value) == {:ok, []}
+      assert_raise ArgumentError, fn -> String.to_existing_atom(value) end
+    end
+
+    test "reports a schema that JSV cannot build" do
+      schema = %{"x-jsv-cast" => ["Elixir.JSV.Cast", "string_to_atom"]}
+      spec = %{"openapi" => "3.1.0", "paths" => %{"/x" => %{"get" => response(schema)}}}
+      {:ok, operation} = Specs.operation(spec, "get", "/x")
+
+      assert {:error, {:invalid_schema, %FunctionClauseError{}}} = Checker.compare(spec, operation, 200, "x")
+    end
+  end
+
+  defp response(schema) do
+    %{"responses" => %{"200" => %{"content" => %{"application/json" => %{"schema" => schema}}}}}
+  end
 end

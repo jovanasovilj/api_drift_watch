@@ -68,6 +68,19 @@ defmodule DriftWatch.SpecsTest do
     end
   end
 
+  describe "operations/1" do
+    test "lists every operation sorted by path" do
+      assert Specs.operations(@library) == [{"get", "/books"}, {"get", "/books/{id}"}, {"delete", "/books/{id}"}]
+    end
+
+    test "skips path keys that are not operations and paths of the wrong shape" do
+      spec = %{"paths" => %{"/a" => %{"parameters" => [], "get" => %{}}, "/b" => "not a path item"}}
+
+      assert Specs.operations(spec) == [{"get", "/a"}]
+      assert Specs.operations(%{"paths" => []}) == []
+    end
+  end
+
   describe "response_schema/3" do
     setup do
       {:ok, operation} = Specs.operation(@library, "get", "/books/{id}")

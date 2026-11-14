@@ -15,6 +15,7 @@ defmodule DriftWatch.Specs do
 
   @dialect "https://json-schema.org/draft/2020-12/schema"
   @max_ref_hops 32
+  @http_methods ~w(get put post delete options head patch trace)
 
   @doc """
   Downloads a spec and parses it with `parse/1`.
@@ -68,6 +69,18 @@ defmodule DriftWatch.Specs do
       nil -> {:error, :unknown_operation}
     end
   end
+
+  @doc """
+  Lists every operation in the spec as `{method, path}`, sorted by path. Path items that are
+  not maps and keys that are not HTTP methods, like `parameters`, are skipped.
+  """
+  def operations(%{"paths" => %{} = paths}) do
+    for {path, %{} = item} <- Enum.sort(paths), method <- @http_methods, is_map(item[method]) do
+      {method, path}
+    end
+  end
+
+  def operations(_spec), do: []
 
   @doc """
   Finds the JSON response schema for a status code.

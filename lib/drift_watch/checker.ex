@@ -70,10 +70,13 @@ defmodule DriftWatch.Checker do
     end
   end
 
+  # Specs come from the internet, so JSV gets no way to turn their strings into atoms
+  # (`atoms: false` drops the `x-jsv-cast` casts that would) and casts nothing at all.
+  # We only want to know whether the body matches.
   defp validate(body, document) do
-    case JSV.build(document) do
+    case build(document) do
       {:ok, root} ->
-        case JSV.validate(body, root) do
+        case JSV.validate(body, root, cast: false) do
           {:ok, _casted} -> {:ok, []}
           {:error, error} -> {:ok, SchemaErrors.to_drifts(error, body, document)}
         end
@@ -81,6 +84,14 @@ defmodule DriftWatch.Checker do
       {:error, build_error} ->
         {:error, {:invalid_schema, build_error}}
     end
+  end
+
+  # A malformed JSV keyword like `"x-jsv-cast": ["a", "b"]` makes JSV raise instead of
+  # returning an error. A broken spec is a result to show, not a reason to crash.
+  defp build(document) do
+    JSV.build(document, atoms: false)
+  rescue
+    exception -> {:error, exception}
   end
 
   defp fetch_method(method) do

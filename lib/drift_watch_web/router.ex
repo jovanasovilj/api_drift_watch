@@ -24,6 +24,7 @@ defmodule DriftWatchWeb.Router do
 
     live "/", DashboardLive
     live "/checks/:id", CheckLive
+    live "/compare", CompareLive
   end
 
   scope "/drifty", DriftWatchWeb do

@@ -40,6 +40,9 @@ defmodule DriftWatchWeb.Layouts do
           <.icon name="hero-signal" class="size-5 text-primary" /> API Drift Watch
         </.link>
         <div class="flex items-center gap-4 text-sm">
+          <.link navigate={~p"/compare"} class="link link-hover text-base-content/70">
+            Compare
+          </.link>
           <a href={~p"/drifty/openapi.json"} class="link link-hover text-base-content/70">
             Drifty spec
           </a>

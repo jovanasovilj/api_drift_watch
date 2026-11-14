@@ -65,24 +65,28 @@ defmodule DriftWatchWeb.DashboardLive do
             <p class="font-mono text-xs text-base-content/60">{api.base_url}</p>
           </div>
           <p class="text-xs text-base-content/60">
+            <a href={api.spec_url} class="link link-hover" target="_blank" rel="noopener noreferrer">
+              Spec
+            </a>
             <%= if api.spec_fetched_at do %>
-              Spec loaded {format_time(api.spec_fetched_at)}
+              loaded {format_time(api.spec_fetched_at)}
             <% else %>
-              Spec loads on the first run
+              loads on the first run
             <% end %>
           </p>
         </header>
 
         <div class="overflow-x-auto">
-          <table class="table">
+          <%!-- Fixed column widths so the columns line up across every API section --%>
+          <table class="table min-w-[56rem] table-fixed">
             <thead>
               <tr>
                 <th>Endpoint</th>
-                <th>Status</th>
-                <th>Drift in last run</th>
-                <th class="text-right">Time</th>
-                <th>Last run</th>
-                <th><span class="sr-only">Actions</span></th>
+                <th class="w-24">Status</th>
+                <th class="w-56">Drift in last run</th>
+                <th class="w-24 text-right">Time</th>
+                <th class="w-44">Last run</th>
+                <th class="w-28"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
@@ -110,7 +114,7 @@ defmodule DriftWatchWeb.DashboardLive do
                     id={"run-now-#{check.id}"}
                     phx-click="run_now"
                     phx-value-id={check.id}
-                    class="btn btn-ghost btn-xs"
+                    class="btn btn-ghost btn-xs whitespace-nowrap"
                   >
                     <.icon name="hero-play" class="size-4" /> Run now
                   </button>

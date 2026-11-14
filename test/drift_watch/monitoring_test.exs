@@ -67,10 +67,11 @@ defmodule DriftWatch.MonitoringTest do
 
     test "broadcasts every recorded run", %{check: check} do
       Monitoring.subscribe()
-      {:ok, run} = Monitoring.record_run(check, ok_result([]), @now)
+      {:ok, %{id: run_id}} = Monitoring.record_run(check, ok_result([]), @now)
 
-      assert_receive {:run_recorded, check_id, run_id}
-      assert {check_id, run_id} == {check.id, run.id}
+      # Tests run in parallel and share the topic, so only our own message counts.
+      check_id = check.id
+      assert_receive {:run_recorded, ^check_id, ^run_id}
     end
   end
 

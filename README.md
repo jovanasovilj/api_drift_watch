@@ -6,6 +6,28 @@ It is built with Elixir, Phoenix LiveView, Oban and PostgreSQL.
 
 ![Dashboard](docs/dashboard.png)
 
+## What it found in real APIs
+
+The app watches four public APIs. On its first runs it found two places where the API and its own spec disagree. Both were checked by hand against the spec and a raw `curl`.
+
+| API | Drift | Details |
+|---|---|---|
+| Open-Meteo forecast | extra field `#/current_units/interval` | The response sends `"interval": "seconds"` in `current_units`. The spec documents `interval` in `current` but forgot it in `current_units`. |
+| Swagger Petstore 3.1 | invalid value `#/availableInstances` | Every pet comes back with `availableInstances: 0`, while the spec says `exclusiveMinimum: 1`. |
+
+GitHub (`GET /repos/{owner}/{repo}`) and PokeAPI (`GET /api/v2/pokemon/{id}/`) matched their specs.
+
+| API | Spec | Check | Every |
+|---|---|---|---|
+| [Open-Meteo](https://open-meteo.com) | 3.1, YAML | `GET /v1/forecast` for De Bilt | 15 min |
+| [PokeAPI](https://pokeapi.co) | 3.1, YAML | `GET /api/v2/pokemon/pikachu/` | 30 min |
+| [GitHub REST API](https://docs.github.com/rest) | 3.1, JSON, 14 MB | `GET /repos/phoenixframework/phoenix` | 15 min |
+| [Swagger Petstore 3.1](https://petstore31.swagger.io) | 3.1, JSON | `GET /pet/1` | 10 min |
+
+The intervals are polite on purpose: GitHub allows 60 calls an hour without a token and PokeAPI asks clients to cache.
+
+![Real APIs on the dashboard](docs/real_apis.png)
+
 ## What counts as drift
 
 | Kind | Example |
@@ -28,9 +50,9 @@ mix setup          # dependencies, database, demo data and assets
 mix phx.server
 ```
 
-Open http://localhost:4000. Within a minute the scheduler runs the first checks. Press Run now to run one right away.
+Open http://localhost:4000. Within a minute the scheduler runs the first checks. Press Run now to run one right away. The four public APIs need internet access.
 
-The demo watches the drifty API that ships with the app: a small weather station API with its own spec at `/drifty/openapi.json`. About half of its responses break the spec on purpose, so there is always something to see. Ask for a specific drift with `?drift=wrong_type`, for example http://localhost:4000/drifty/stations/1?drift=wrong_type.
+Next to the public APIs the app watches the drifty API that ships with it: a small weather station API with its own spec at `/drifty/openapi.json`. About half of its responses break the spec on purpose, so there is always something to see. Ask for a specific drift with `?drift=wrong_type`, for example http://localhost:4000/drifty/stations/1?drift=wrong_type.
 
 ![Check detail](docs/check.png)
 
@@ -81,6 +103,12 @@ Oban cron, every minute
 
 **Tests do not touch the network.** All HTTP goes through `DriftWatch.HTTP`, so tests stub it with `Req.Test`. Some tests route requests into the app's own endpoint and run the whole stack: Oban job, HTTP, spec, checker and database.
 
+**Check the real specs before writing code for them.** The plan was to convert OpenAPI 3.0 specs first. Downloading the candidates showed that all four publish a 3.1 spec, so the conversion was not needed. What they did need was not in the plan:
+
+* YAML support, because Open-Meteo and PokeAPI publish YAML. YAML reads an unquoted `200:` as a number, so every key becomes a string after parsing.
+* A base URI. Petstore 3.1 references schemas by a relative `$id` like `/api/v31/components/schemas/petdetails`, which JSV can only place when the document has an absolute `$id`. OpenAPI 3.1 says relative references resolve against the URL the spec was loaded from, so that URL becomes the `$id`.
+* Keeping big specs out of page loads. GitHub's spec is 14 MB, so the `spec` column is not loaded by normal queries and is only read when a check runs. The dashboard stays at a few milliseconds.
+
 **A strict Content Security Policy.** Everything loads from the app itself and nothing runs inline. The theme script that Phoenix puts inline in the layout is a separate file for that reason.
 
 ## Quality checks
@@ -95,8 +123,8 @@ GitHub Actions runs all of them on every push. Formatting uses Styler.
 
 ## Limits and next steps
 
-* Only OpenAPI 3.1 and 3.2. Many public APIs still publish 3.0, which uses `nullable` and needs a conversion step.
-* JSON specs only, no YAML yet.
-* Local `$ref` values only. References to other files are not followed.
+* Only OpenAPI 3.1 and 3.2. Specs in 3.0 use `nullable` and need a conversion step.
+* References to other files are not followed. References by `$id` inside the spec work for validation, but the extra field check skips the schemas it can only reach that way.
+* Specs come from URLs the operator sets up, so there is no size limit or protection against YAML alias bombs yet. Both would matter before users could add their own APIs.
 * Response headers and content types are not compared yet.
-* Next: real public APIs (Open-Meteo, PokeAPI, GitHub and Swagger Petstore) after checking which of their specs are current.
+* There is no UI to add an API or a check yet. The seeds add them.

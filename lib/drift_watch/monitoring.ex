@@ -64,7 +64,7 @@ defmodule DriftWatch.Monitoring do
   """
   def ensure_spec(%Api{} = api, now \\ DateTime.utc_now(:second)) do
     if fresh_spec?(api, now) do
-      {:ok, api}
+      {:ok, %{api | spec: Repo.one!(from a in Api, where: a.id == ^api.id, select: a.spec)}}
     else
       with {:ok, spec} <- Specs.fetch(api.spec_url) do
         api
@@ -74,7 +74,6 @@ defmodule DriftWatch.Monitoring do
     end
   end
 
-  defp fresh_spec?(%Api{spec: nil}, _now), do: false
   defp fresh_spec?(%Api{spec_fetched_at: nil}, _now), do: false
   defp fresh_spec?(api, now), do: DateTime.diff(now, api.spec_fetched_at, :hour) < @spec_max_age_hours
 

@@ -94,6 +94,31 @@ defmodule DriftWatch.CheckerTest do
     end
   end
 
+  describe "compare/5 with schemas that reference each other by $id" do
+    setup do
+      spec = Fixtures.json!("id_refs_openapi.json")
+      {:ok, operation} = Specs.operation(spec, "get", "/pets/{id}")
+      %{spec: spec, operation: operation}
+    end
+
+    test "resolves relative $id references against the spec URL", %{spec: spec, operation: operation} do
+      body = %{"name" => "Rex", "stock" => 0, "details" => %{"id" => "seven"}}
+
+      expected = [
+        drift(:wrong_type, "#/details/id", "integer", "string"),
+        drift(:invalid_value, "#/stock", "exclusiveMinimum 1", "0")
+      ]
+
+      assert {:ok, ^expected} = Checker.compare(spec, operation, 200, body, "https://pets.test/api/openapi.json")
+    end
+
+    test "works without a known spec URL", %{spec: spec, operation: operation} do
+      body = %{"name" => "Rex", "details" => %{"id" => "seven"}}
+
+      assert {:ok, [%Drift{kind: :wrong_type, path: "#/details/id"}]} = Checker.compare(spec, operation, 200, body)
+    end
+  end
+
   describe "compare/4 status lookup" do
     test "reports a status the spec does not document" do
       assert compare("get", "/books/{id}", 418, %{}) == [
@@ -121,7 +146,7 @@ defmodule DriftWatch.CheckerTest do
   end
 
   describe "run/3" do
-    @api %{base_url: "https://library.test", spec: @library}
+    @api %{base_url: "https://library.test", spec_url: "https://library.test/openapi.json", spec: @library}
 
     test "fills path params, sends the rest as query params and compares the response" do
       Req.Test.stub(DriftWatch.HTTP, fn conn ->

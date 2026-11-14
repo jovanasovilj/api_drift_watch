@@ -140,8 +140,16 @@ defmodule DriftWatch.Checker.SchemaErrors do
     end
   end
 
+  # JSV reports schema locations as the document `$id` plus a pointer from the document root,
+  # like `https://example.com/openapi.json#/components/schemas/Pet`. We only need the pointer.
   defp schema_at(document, location) do
-    case JsonPointer.fetch(document, location) do
+    pointer =
+      case String.split(location, "#", parts: 2) do
+        [_base_uri, fragment] -> "#" <> fragment
+        [_no_fragment] -> location
+      end
+
+    case JsonPointer.fetch(document, pointer) do
       {:ok, schema} -> document |> Specs.resolve(schema) |> as_map()
       :error -> %{}
     end

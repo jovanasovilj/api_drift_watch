@@ -26,7 +26,7 @@ defmodule DriftWatchWeb.DriftyControllerTest do
   # The checker goes through the whole HTTP stack here, with the endpoint as its plug.
   test "the checker finds the drift through HTTP" do
     {:ok, spec} = Specs.parse(Drifty.spec_json())
-    api = %{base_url: "http://drifty.test", spec: spec}
+    api = %{base_url: "http://drifty.test", spec_url: "http://drifty.test/drifty/openapi.json", spec: spec}
     check = %{method: "get", path: "/drifty/stations/{id}", params: %{"id" => 2, "drift" => "wrong_type"}}
 
     assert {:ok, result} = Checker.run(api, check, plug: DriftWatchWeb.Endpoint)

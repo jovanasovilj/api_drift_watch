@@ -31,8 +31,8 @@ defmodule DriftWatch.Checker do
   @doc """
   Calls the endpoint of `check` on `api` and compares the response with the spec.
 
-  `api` needs `:base_url` and a parsed `:spec`. `check` needs `:method`, `:path` and
-  `:params`. Returns the status, the duration in milliseconds, the decoded body and the
+  `api` needs `:base_url`, `:spec_url` and a parsed `:spec`. `check` needs `:method`, `:path`
+  and `:params`. Returns the status, the duration in milliseconds, the decoded body and the
   drifts.
   """
   def run(api, check, req_options \\ []) do
@@ -40,7 +40,7 @@ defmodule DriftWatch.Checker do
          {:ok, operation} <- Specs.operation(api.spec, check.method, check.path),
          {:ok, path, query} <- fill_path(check.path, check.params || %{}),
          {:ok, response, duration_ms} <- request(api.base_url, method, path, query, req_options),
-         {:ok, drifts} <- compare(api.spec, operation, response.status, response.body) do
+         {:ok, drifts} <- compare(api.spec, operation, response.status, response.body, api.spec_url) do
       {:ok, %{status: response.status, duration_ms: duration_ms, body: response.body, drifts: drifts}}
     end
   end
@@ -49,8 +49,9 @@ defmodule DriftWatch.Checker do
   Compares a status code and a decoded body with what the operation documents.
 
   Drifts come back sorted by path, so the same response always gives the same list.
+  `base_uri` is the URL the spec came from, see `DriftWatch.Specs.schema_document/3`.
   """
-  def compare(spec, operation, status, body) do
+  def compare(spec, operation, status, body, base_uri \\ Specs.default_base_uri()) do
     case Specs.response_schema(spec, operation, status) do
       :undocumented ->
         documented = operation |> Specs.documented_statuses() |> Enum.join(", ")
@@ -60,7 +61,7 @@ defmodule DriftWatch.Checker do
         {:ok, []}
 
       {:ok, schema} ->
-        document = Specs.schema_document(spec, schema)
+        document = Specs.schema_document(spec, schema, base_uri)
 
         with {:ok, schema_drifts} <- validate(body, document) do
           drifts = schema_drifts ++ ExtraFields.find(body, schema, document)

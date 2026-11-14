@@ -7,7 +7,7 @@ defmodule DriftWatch.Specs do
 
   Only OpenAPI 3.1 and 3.2 are supported for now. Their schemas are JSON Schema 2020-12, which
   is what JSV validates. OpenAPI 3.0 schemas use a different dialect (`nullable` for example) and
-  need a conversion step first.
+  need a conversion step first. Specs can be JSON or YAML.
   """
 
   alias DriftWatch.HTTP
@@ -28,12 +28,13 @@ defmodule DriftWatch.Specs do
   end
 
   @doc """
-  Turns a decoded or raw JSON spec into a map and checks that it is OpenAPI 3.1 or 3.2.
+  Turns a decoded spec or raw JSON or YAML text into a map and checks that it is OpenAPI 3.1
+  or 3.2.
   """
   def parse(body) when is_binary(body) do
-    case Jason.decode(body) do
-      {:ok, spec} -> parse(spec)
-      {:error, _error} -> {:error, :invalid_json}
+    case decode(body) do
+      {:ok, %{} = spec} -> parse(spec)
+      _not_a_document -> {:error, :not_json_or_yaml}
     end
   end
 
@@ -41,6 +42,22 @@ defmodule DriftWatch.Specs do
   def parse(%{"openapi" => "3.2." <> _patch} = spec), do: {:ok, spec}
   def parse(%{"openapi" => version}), do: {:error, {:unsupported_version, version}}
   def parse(_body), do: {:error, :not_an_openapi_spec}
+
+  # JSON first, because it is stricter and most specs are JSON. YAML reads an unquoted `200:`
+  # as the integer 200, so all keys become strings to match what JSON gives.
+  defp decode(text) do
+    case Jason.decode(text) do
+      {:ok, spec} ->
+        {:ok, spec}
+
+      {:error, _not_json} ->
+        with {:ok, spec} <- YamlElixir.read_from_string(text), do: {:ok, string_keys(spec)}
+    end
+  end
+
+  defp string_keys(%{} = map), do: Map.new(map, fn {key, value} -> {to_string(key), string_keys(value)} end)
+  defp string_keys(list) when is_list(list), do: Enum.map(list, &string_keys/1)
+  defp string_keys(value), do: value
 
   @doc """
   Finds the operation for a method and a path template like `/stations/{id}`.
@@ -81,15 +98,26 @@ defmodule DriftWatch.Specs do
 
   The spec components go along, so local `$ref` values like `#/components/schemas/Station`
   resolve against this document the same way they do against the spec.
+
+  The document gets `base_uri` as its `$id`. OpenAPI 3.1 resolves relative references against
+  the URL the spec was loaded from. Schemas may also declare a relative `$id` of their own, as
+  the Petstore 3.1 spec does. Without a base JSV cannot place those.
   """
-  def schema_document(spec, schema) do
+  def schema_document(spec, schema, base_uri \\ default_base_uri()) do
     %{
       "$schema" => @dialect,
+      "$id" => base_uri,
       "$ref" => "#/$defs/response",
       "$defs" => %{"response" => schema},
       "components" => Map.get(spec, "components", %{})
     }
   end
+
+  @doc """
+  The base URI for a spec whose URL we do not know, like a fixture in a test. The `.invalid`
+  domain is reserved and never resolves.
+  """
+  def default_base_uri, do: "https://spec.invalid/openapi.json"
 
   @doc """
   Follows `$ref` values until it reaches a schema without one.

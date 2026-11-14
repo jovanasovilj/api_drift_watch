@@ -1,0 +1,39 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Schemas that reference each other by $id", "version": "1.0.0" },
+  "paths": {
+    "/pets/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "A pet",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Pet" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "stock": { "type": "integer", "exclusiveMinimum": 1 },
+          "details": { "$ref": "/api/components/schemas/details" }
+        }
+      },
+      "Details": {
+        "$id": "/api/components/schemas/details",
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "color": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -24,7 +24,7 @@ defmodule DriftWatchWeb.DriftComponents do
 
   def endpoint(assigns) do
     ~H"""
-    <span class="font-mono text-sm">
+    <span class="font-mono text-sm [overflow-wrap:anywhere]">
       <span class="font-semibold uppercase text-primary">{@check.method}</span>
       {@check.path}
       <span :if={@check.params != %{}} class="text-base-content/50">
@@ -71,7 +71,10 @@ defmodule DriftWatchWeb.DriftComponents do
     ~H"""
     <span :if={is_nil(@run)} class="text-base-content/40">Not run yet</span>
     <span :if={@run && @run.error} class="text-base-content/40">No response to compare</span>
-    <span :if={@run && is_nil(@run.error) && @counts == []} class="text-success text-sm">
+    <span
+      :if={@run && is_nil(@run.error) && @counts == []}
+      class="whitespace-nowrap text-success text-sm"
+    >
       Matches the spec
     </span>
     <span :if={@counts != []} class="flex flex-wrap gap-1">

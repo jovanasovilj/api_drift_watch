@@ -12,10 +12,25 @@ defmodule DriftWatch.SpecsTest do
       assert {:ok, %{"openapi" => "3.2.0"}} = Specs.parse(~s({"openapi": "3.2.0"}))
     end
 
+    test "reads YAML and turns every key into a string" do
+      yaml = """
+      openapi: 3.1.0
+      paths:
+        /stations/{id}:
+          get:
+            responses:
+              200:
+                description: The station
+      """
+
+      assert {:ok, spec} = Specs.parse(yaml)
+      assert %{"description" => "The station"} = spec["paths"]["/stations/{id}"]["get"]["responses"]["200"]
+    end
+
     test "refuses other versions and other documents" do
       assert Specs.parse(%{"openapi" => "3.0.3"}) == {:error, {:unsupported_version, "3.0.3"}}
       assert Specs.parse(%{"swagger" => "2.0"}) == {:error, :not_an_openapi_spec}
-      assert Specs.parse("not json") == {:error, :invalid_json}
+      assert Specs.parse("just a sentence") == {:error, :not_json_or_yaml}
     end
   end
 

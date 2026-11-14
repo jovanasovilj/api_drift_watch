@@ -20,7 +20,11 @@ defmodule DriftWatch.Workers.CheckWorkerTest do
 
     assert [run] = Monitoring.list_runs(check.id)
     assert %{status: 200, error: nil, drifts: [%{kind: :missing_field, path: "#/name"}]} = run
-    assert Monitoring.get_check!(check.id).api.spec["openapi"] == "3.1.0"
+    api = Monitoring.get_check!(check.id).api
+    assert %{spec: nil, spec_fetched_at: %DateTime{}} = api
+
+    Req.Test.stub(DriftWatch.HTTP, fn _conn -> flunk("the stored spec should be used") end)
+    assert {:ok, %{spec: %{"openapi" => "3.1.0"}}} = Monitoring.ensure_spec(api)
   end
 
   test "stores an undocumented 500 as drift and not as a failed job", %{api: api} do

@@ -65,6 +65,7 @@ defmodule DriftWatch.MixProject do
       {:req, "~> 0.7"},
       {:jsv, "~> 0.27"},
       {:oban, "~> 2.24"},
+      {:yaml_elixir, "~> 2.12"},
       {:styler, "~> 1.12", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

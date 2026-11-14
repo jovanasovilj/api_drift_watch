@@ -2,6 +2,9 @@ defmodule DriftWatch.Monitoring.Api do
   @moduledoc """
   A watched API with its spec. The spec is cached here so a check does not download it on
   every run.
+
+  Specs can be large (GitHub's is about 14 MB), so the `spec` column is not loaded by normal
+  queries. `DriftWatch.Monitoring.ensure_spec/2` reads it when a check needs it.
   """
 
   use Ecto.Schema
@@ -14,7 +17,7 @@ defmodule DriftWatch.Monitoring.Api do
     field :name, :string
     field :base_url, :string
     field :spec_url, :string
-    field :spec, :map
+    field :spec, :map, load_in_query: false
     field :spec_fetched_at, :utc_datetime
 
     has_many :checks, Check

@@ -48,6 +48,11 @@ defmodule DriftWatch.Drifty do
   def spec_json, do: @spec_json
 
   @doc """
+  Tells whether a watched API is this demo, by the path its spec is served at.
+  """
+  def demo?(%{spec_url: spec_url}), do: URI.parse(spec_url).path == "/drifty/openapi.json"
+
+  @doc """
   Lists the drifts the API can be asked for, `"none"` included.
   """
   def drifts, do: @drifts

@@ -42,6 +42,16 @@ defmodule DriftWatchWeb.DashboardLiveTest do
     assert has_element?(view, "#check-#{idle.id}", "Not run yet")
   end
 
+  test "marks the drifty demo API so its random results make sense", %{conn: conn} do
+    demo = api_fixture()
+    real = api_fixture(%{name: "Real", spec_url: "https://api.example.com/openapi.json"})
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#api-#{demo.id} .demo-note", "at random")
+    refute has_element?(view, "#api-#{real.id} .demo-note")
+  end
+
   test "updates live when a run is recorded", %{conn: conn} do
     check = check_fixture(api_fixture())
     {:ok, view, _html} = live(conn, ~p"/")

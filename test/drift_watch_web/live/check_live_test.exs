@@ -61,4 +61,14 @@ defmodule DriftWatchWeb.CheckLiveTest do
   test "goes back to the dashboard for an unknown check", %{conn: conn} do
     assert {:error, {:live_redirect, %{to: "/"}}} = live(conn, ~p"/checks/0")
   end
+
+  test "says when the check belongs to the drifty demo API", %{conn: conn, check: check} do
+    real = check_fixture(api_fixture(%{spec_url: "https://api.example.com/openapi.json"}))
+
+    {:ok, demo_view, _html} = live(conn, ~p"/checks/#{check.id}")
+    {:ok, real_view, _html} = live(conn, ~p"/checks/#{real.id}")
+
+    assert has_element?(demo_view, "#demo-note", "at random")
+    refute has_element?(real_view, "#demo-note")
+  end
 end

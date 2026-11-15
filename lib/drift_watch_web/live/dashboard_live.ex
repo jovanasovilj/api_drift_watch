@@ -8,6 +8,7 @@ defmodule DriftWatchWeb.DashboardLive do
 
   use DriftWatchWeb, :live_view
 
+  alias DriftWatch.Drifty
   alias DriftWatch.Monitoring
   alias DriftWatch.Workers.CheckWorker
 
@@ -74,6 +75,10 @@ defmodule DriftWatchWeb.DashboardLive do
           <div>
             <h2 class="font-semibold">{api.name}</h2>
             <p class="font-mono text-xs text-base-content/60">{api.base_url}</p>
+            <p :if={Drifty.demo?(api)} class="demo-note mt-1 text-xs text-base-content/70">
+              <span class="badge badge-xs badge-neutral">demo</span>
+              This API runs inside the app. Half of its answers break the spec at random on purpose.
+            </p>
           </div>
           <p class="text-xs text-base-content/60">
             <a href={api.spec_url} class="link link-hover" target="_blank" rel="noopener noreferrer">

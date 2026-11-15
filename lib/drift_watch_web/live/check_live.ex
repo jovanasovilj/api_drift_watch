@@ -8,6 +8,7 @@ defmodule DriftWatchWeb.CheckLive do
 
   use DriftWatchWeb, :live_view
 
+  alias DriftWatch.Drifty
   alias DriftWatch.Monitoring
   alias DriftWatch.Workers.CheckWorker
 
@@ -73,6 +74,10 @@ defmodule DriftWatchWeb.CheckLive do
           <h1 class="text-xl"><.endpoint check={@check} /></h1>
           <p class="mt-1 text-sm text-base-content/70">
             {@check.api.name} · every {@check.interval_minutes} min · times are UTC
+          </p>
+          <p :if={Drifty.demo?(@check.api)} id="demo-note" class="mt-1 text-sm text-base-content/70">
+            <span class="badge badge-xs badge-neutral">demo</span>
+            This API breaks the spec at random on purpose, so every run can look different.
           </p>
         </div>
         <button id="run-now" phx-click="run_now" class="btn btn-primary btn-sm">

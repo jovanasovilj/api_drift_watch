@@ -34,13 +34,21 @@ defmodule DriftWatchWeb.DashboardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold">Dashboard</h1>
-        <p class="mt-1 text-base-content/70">
-          Every check calls a real endpoint on a schedule and compares the response with the
-          OpenAPI spec. Times are UTC.
-        </p>
+    <Layouts.app flash={@flash} active={:dashboard}>
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-semibold">Dashboard</h1>
+          <p class="mt-1 text-base-content/70">
+            Every check calls a real endpoint on a schedule and compares the response with the
+            OpenAPI spec. Times are UTC.
+          </p>
+        </div>
+        <div id="compare-cta" class="flex items-center gap-3">
+          <span class="text-sm text-base-content/70">Want to check your own API?</span>
+          <.link navigate={~p"/compare"} class="btn btn-primary btn-sm">
+            Compare a response
+          </.link>
+        </div>
       </div>
 
       <div
@@ -50,7 +58,10 @@ defmodule DriftWatchWeb.DashboardLive do
       >
         <p class="font-medium">No APIs are watched yet.</p>
         <p class="mt-1 text-sm text-base-content/70">
-          Run <code class="font-mono">mix run priv/repo/seeds.exs</code> to add the drifty demo API.
+          Run <code class="font-mono">mix run priv/repo/seeds.exs</code>
+          to add the drifty demo API.
+          Or <.link navigate={~p"/compare"} class="link">compare a response</.link>
+          with a spec right away.
         </p>
       </div>
 

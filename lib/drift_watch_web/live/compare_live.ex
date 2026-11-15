@@ -89,7 +89,7 @@ defmodule DriftWatchWeb.CompareLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} active={:compare}>
       <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold">Compare a response with its spec</h1>

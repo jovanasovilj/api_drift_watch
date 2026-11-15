@@ -15,6 +15,17 @@ defmodule DriftWatchWeb.DashboardLiveTest do
     {:ok, view, _html} = live(conn, ~p"/")
 
     assert has_element?(view, "#empty-state")
+    assert has_element?(view, ~s(#empty-state a[href="/compare"]))
+  end
+
+  test "marks the dashboard in the navigation and points to the compare page", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, ~s(nav a[aria-current="page"]), "Dashboard")
+    refute has_element?(view, ~s(nav a[aria-current="page"]), "Compare")
+
+    {:ok, compare, _html} = view |> element("#compare-cta a") |> render_click() |> follow_redirect(conn)
+    assert has_element?(compare, ~s(nav a[aria-current="page"]), "Compare")
   end
 
   test "shows every check with the drift of its latest run", %{conn: conn} do

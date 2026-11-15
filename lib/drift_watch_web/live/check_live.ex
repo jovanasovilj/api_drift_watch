@@ -63,7 +63,7 @@ defmodule DriftWatchWeb.CheckLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} active={:dashboard}>
       <.link navigate={~p"/"} class="text-sm text-base-content/70 hover:underline">
         <.icon name="hero-arrow-left" class="size-4" /> Dashboard
       </.link>

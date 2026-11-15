@@ -60,7 +60,7 @@ Next to the public APIs the app watches the drifty API that ships with it: a sma
 
 ## Compare your own spec
 
-Open http://localhost:4000/compare and paste an OpenAPI 3.1 spec (JSON or YAML) and a response body. Pick the operation and the status code and the page lists every drift. It runs the same checker as the watched APIs. Nothing is fetched and nothing is stored, so it also works for private APIs the server could never reach. Press Try the example to load the drifty spec with a response that has five drifts.
+Press Compare a response on the dashboard (or open http://localhost:4000/compare) and paste an OpenAPI 3.1 spec (JSON or YAML) and a response body. Pick the operation and the status code and the page lists every drift. It runs the same checker as the watched APIs. Nothing is fetched and nothing is stored, so it also works for private APIs the server could never reach. Press Try the example to load the drifty spec with a response that has five drifts.
 
 ![Compare page](docs/compare.png)
 

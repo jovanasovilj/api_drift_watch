@@ -30,6 +30,11 @@ defmodule DriftWatchWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
+  attr :active, :atom,
+    default: nil,
+    values: [nil, :dashboard, :compare],
+    doc: "the page to highlight in the navigation"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -39,14 +44,10 @@ defmodule DriftWatchWeb.Layouts do
         <.link navigate={~p"/"} class="flex items-center gap-2 font-semibold">
           <.icon name="hero-signal" class="size-5 text-primary" /> API Drift Watch
         </.link>
-        <div class="flex items-center gap-4 text-sm">
-          <.link navigate={~p"/compare"} class="link link-hover text-base-content/70">
-            Compare
-          </.link>
-          <a href={~p"/drifty/openapi.json"} class="link link-hover text-base-content/70">
-            Drifty spec
-          </a>
-          <.theme_toggle />
+        <div class="flex items-center gap-1 text-sm sm:gap-2">
+          <.nav_link navigate={~p"/"} active={@active == :dashboard}>Dashboard</.nav_link>
+          <.nav_link navigate={~p"/compare"} active={@active == :compare}>Compare</.nav_link>
+          <div class="ml-2"><.theme_toggle /></div>
         </div>
       </nav>
     </header>
@@ -56,6 +57,25 @@ defmodule DriftWatchWeb.Layouts do
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  attr :navigate, :string, required: true
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  defp nav_link(assigns) do
+    ~H"""
+    <.link
+      navigate={@navigate}
+      aria-current={@active && "page"}
+      class={[
+        "rounded-field px-3 py-1.5",
+        if(@active, do: "bg-base-200 font-medium", else: "text-base-content/70 hover:bg-base-200")
+      ]}
+    >
+      {render_slot(@inner_block)}
+    </.link>
     """
   end
 

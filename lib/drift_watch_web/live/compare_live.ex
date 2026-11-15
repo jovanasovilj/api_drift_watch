@@ -52,8 +52,6 @@ defmodule DriftWatchWeb.CompareLive do
 
   defp maybe_load_example(socket, _params), do: socket
 
-  # A drifty station with five drifts at once: a missing name, a temperature as text, a
-  # null latitude, an unknown status and a field the spec never mentions.
   defp example_body do
     {200, station} = Drifty.station("1", "none")
 

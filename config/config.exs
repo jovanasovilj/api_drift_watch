@@ -1,13 +1,5 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-
-# General application configuration
 import Config
 
-# Configure the endpoint
 config :drift_watch, DriftWatchWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
@@ -32,7 +24,6 @@ config :drift_watch,
   ecto_repos: [DriftWatch.Repo],
   generators: [timestamp_type: :utc_datetime]
 
-# Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
   drift_watch: [
@@ -42,20 +33,15 @@ config :esbuild,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
-# Configure Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-# Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Configure LiveView
 config :phoenix_live_view,
-  # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.
   root_tag_attribute: "phx-r"
 
-# Configure tailwind (the version is required)
 config :tailwind,
   version: "4.3.3",
   drift_watch: [
@@ -67,6 +53,5 @@ config :tailwind,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+# Stays at the bottom so the environment config overrides everything above.
 import_config "#{config_env()}.exs"

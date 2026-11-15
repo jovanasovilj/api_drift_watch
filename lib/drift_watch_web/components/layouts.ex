@@ -4,22 +4,15 @@ defmodule DriftWatchWeb.Layouts do
   """
   use DriftWatchWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
   @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
+  Renders the app shell: the header with the navigation, the page content and the flash
+  messages. `active` marks the current page in the navigation.
 
   ## Examples
 
-      <Layouts.app flash={@flash}>
+      <Layouts.app flash={@flash} active={:dashboard}>
         <h1>Content</h1>
       </Layouts.app>
 
@@ -129,9 +122,9 @@ defmodule DriftWatchWeb.Layouts do
   end
 
   @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
+  Switches between the system, light and dark themes defined in `app.css`.
 
-  See <head> in root.html.heex which applies the theme before page load.
+  `assets/js/theme.js` applies the saved theme before the page paints.
   """
   def theme_toggle(assigns) do
     ~H"""

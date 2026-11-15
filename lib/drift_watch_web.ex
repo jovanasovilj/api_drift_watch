@@ -1,20 +1,7 @@
 defmodule DriftWatchWeb do
   @moduledoc """
-  The entrypoint for defining your web interface, such
-  as controllers, components, channels, and so on.
-
-  This can be used in your application as:
-
-      use DriftWatchWeb, :controller
-      use DriftWatchWeb, :html
-
-  The definitions below will be executed for every controller,
-  component, etc, so keep them short and clean, focused
-  on imports, uses and aliases.
-
-  Do NOT define functions inside the quoted expressions
-  below. Instead, define additional modules and import
-  those modules here.
+  The shared setup for the web layer: `use DriftWatchWeb, :live_view`, `:html`,
+  `:controller` and so on pull in the imports and aliases each kind of module needs.
   """
 
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
@@ -25,8 +12,6 @@ defmodule DriftWatchWeb do
 
       import Phoenix.Controller
       import Phoenix.LiveView.Router
-
-      # Import common connection and controller functions to use in pipelines
       import Plug.Conn
     end
   end
@@ -68,33 +53,24 @@ defmodule DriftWatchWeb do
     quote do
       use Phoenix.Component
 
-      # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
 
-      # Include general helpers for rendering HTML
       unquote(html_helpers())
     end
   end
 
   defp html_helpers do
     quote do
-      # Translation
       use Gettext, backend: DriftWatchWeb.Gettext
 
-      # Core UI components
       import DriftWatchWeb.CoreComponents
       import DriftWatchWeb.DriftComponents
-
-      # HTML escaping functionality
       import Phoenix.HTML
 
       alias DriftWatchWeb.Layouts
-
-      # Common modules used in templates
       alias Phoenix.LiveView.JS
 
-      # Routes generation with the ~p sigil
       unquote(verified_routes())
     end
   end
@@ -109,7 +85,7 @@ defmodule DriftWatchWeb do
   end
 
   @doc """
-  When used, dispatch to the appropriate controller/live_view/etc.
+  Pulls in the setup for `use DriftWatchWeb, :live_view` and the other kinds.
   """
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])

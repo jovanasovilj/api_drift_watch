@@ -1,26 +1,19 @@
-/* See the Tailwind configuration guide for advanced usage
-   https://tailwindcss.com/docs/configuration */
-
 @import "tailwindcss" source(none);
 @import "phoenix-colocated/drift_watch/colocated.css";
 @source "../css";
 @source "../js";
 @source "../../lib/drift_watch_web";
-/* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
+/* Picks up changes in colocated CSS files in dev. */
 @source "../../_build/dev/phoenix-colocated/drift_watch/*/";
 
-/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
-   The heroicons installation itself is managed by your mix.exs */
+/* Makes the "hero-*" icon classes available. */
 @plugin "../vendor/heroicons";
 
-/* daisyUI Tailwind Plugin. */
 @plugin "daisyui/packages/bundle/daisyui" {
   themes: false;
 }
 
-/* daisyUI theme plugin.
-  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
-  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
+/* Two themes: a dark one in Elixir colors and a light one in Phoenix colors. */
 @plugin "daisyui/packages/bundle/daisyui-theme" {
   name: "dark";
   default: false;
@@ -91,15 +84,13 @@
   --noise: 0;
 }
 
-/* Add variants based on LiveView classes */
+/* Variants for the classes LiveView sets while it waits for the server. */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
 @custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
 
-/* Use the data attribute for dark mode  */
+/* Dark mode follows the data-theme attribute that the theme toggle sets. */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* Make LiveView wrapper divs transparent for layout */
+/* LiveView wrapper divs take no part in the layout. */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
-
-/* This file is for your main application CSS */

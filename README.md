@@ -74,6 +74,11 @@ Oban cron, every minute
             ├─ Checker   compares the response with the schema
             └─ Monitoring stores the run, updates the drift history, broadcasts on PubSub
                  └─ DashboardLive and CheckLive update live
+
+CompareLive, on every paste
+  └─ Comparison  checks the size, then runs in the Sandbox
+       ├─ Specs     parses the pasted spec and lists its operations
+       └─ Checker   compares the pasted body with the schema
 ```
 
 | Module | Job |
@@ -101,7 +106,7 @@ Oban cron, every minute
 
 **Our own small layer on top.** A validator answers "is this valid". Drift needs more: which kind of problem and where. `SchemaErrors` keeps the leaf errors (`required`, `type`, `enum` and other value rules) and skips the errors that only say a child failed. For `oneOf` and `anyOf` every branch reports its own errors, which would blame the response for branches it never meant to match. So we drop branches where the value has the wrong type altogether and report the branch with the fewest drifts.
 
-**Extra fields need a separate pass.** JSON Schema allows extra properties by default, so no validator reports them. Adding `unevaluatedProperties: false` to every schema looked tempting, but it breaks `allOf`: a shared component would then reject the properties that the other branch adds. `ExtraFields` walks the response next to the schema instead and counts properties from every composed branch as documented. Objects that allow extra fields on purpose (`additionalProperties`) are left alone.
+**Extra fields need a separate pass.** JSON Schema allows extra properties by default, so no validator reports them. Adding `unevaluatedProperties: false` to every schema looked tempting, but it breaks `allOf`: a shared component would then reject the properties that the other branch adds. `ExtraFields` walks the response next to the schema instead and counts properties from every composed branch as documented. Objects that allow extra fields on purpose (`additionalProperties` or `patternProperties`) or list no properties at all are left alone.
 
 **A failed call is a result, not a failed job.** Timeouts, connection errors and specs that do not load are stored as runs with an error. Oban does not retry them, because a retry would hide exactly the flaky behaviour this app wants to show. Req retries are off for the same reason.
 
@@ -117,7 +122,7 @@ Oban cron, every minute
 
 * YAML support, because Open-Meteo and PokeAPI publish YAML. YAML reads an unquoted `200:` as a number, so every key becomes a string after parsing.
 * A base URI. Petstore 3.1 references schemas by a relative `$id` like `/api/v31/components/schemas/petdetails`, which JSV can only place when the document has an absolute `$id`. OpenAPI 3.1 says relative references resolve against the URL the spec was loaded from, so that URL becomes the `$id`.
-* Keeping big specs out of page loads. GitHub's spec is 14 MB, so the `spec` column is not loaded by normal queries and is only read when a check runs. The dashboard stays at a few milliseconds.
+* Keeping big specs out of page loads. GitHub's spec is 14 MB, so the `spec` column is not loaded by normal queries and is only read when a check runs. The dashboard never loads a spec.
 
 **Pasted specs run in a sandbox.** Anyone can paste a spec on the compare page, so it is untrusted input. Three things could go wrong and each has its own limit:
 

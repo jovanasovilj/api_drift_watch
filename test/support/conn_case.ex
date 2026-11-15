@@ -1,18 +1,9 @@
 defmodule DriftWatchWeb.ConnCase do
   @moduledoc """
-  This module defines the test case to be used by
-  tests that require setting up a connection.
+  The test case for tests that need a connection, like controller and LiveView tests.
 
-  Such tests rely on `Phoenix.ConnTest` and also
-  import other functionality to make it easier
-  to build common data structures and query the data layer.
-
-  Finally, if the test case interacts with the database,
-  we enable the SQL sandbox, so changes done to the database
-  are reverted at the end of every test. If you are using
-  PostgreSQL, you can even run database tests asynchronously
-  by setting `use DriftWatchWeb.ConnCase, async: true`, although
-  this option is not recommended for other databases.
+  Each test runs in the SQL sandbox, so its database changes are rolled back at the end
+  and tests can run with `async: true`.
   """
 
   use ExUnit.CaseTemplate
@@ -23,11 +14,8 @@ defmodule DriftWatchWeb.ConnCase do
 
       import DriftWatchWeb.ConnCase
       import Phoenix.ConnTest
-
-      # Import conveniences for testing with connections
       import Plug.Conn
 
-      # The default endpoint for testing
       @endpoint DriftWatchWeb.Endpoint
     end
   end

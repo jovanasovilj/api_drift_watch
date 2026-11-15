@@ -1,7 +1,7 @@
 defmodule DriftWatchWeb.DriftComponents do
   @moduledoc """
-  Small pieces shared by the dashboard and the check page: endpoint labels, status badges
-  and drift kind badges.
+  Small pieces shared by the pages: endpoint labels, status badges, drift kind badges and
+  time formatting.
   """
 
   use Phoenix.Component

@@ -141,11 +141,18 @@ mix deps.audit     # known vulnerable dependencies
 
 GitHub Actions runs all of them on every push. Formatting uses Styler.
 
-## Limits and next steps
+## Limits
 
 * Only OpenAPI 3.1 and 3.2. Specs in 3.0 use `nullable` and need a conversion step.
 * References to other files are not followed. References by `$id` inside the spec work for validation, but the extra field check skips the schemas it can only reach that way.
 * Watched specs come from URLs the operator sets up in the seeds, so they are parsed without the sandbox and without a size limit.
 * Response headers and content types are not compared yet.
-* There is no UI to add an API or a check yet. The seeds add them.
-* Watch mode for your own APIs is the next big step: add an API and its checks in the UI and let the scheduler run them. Most of it exists already. What it needs on top is a block on private and local addresses, so nobody can make the server call its own network (SSRF). It also needs a limit on how often each check runs and the sandbox around spec downloads.
+* There is no UI to add an API or a check. The seeds add them.
+
+## Ideas for later
+
+This project is a showcase and stops here on purpose. If it became a real tool, it would be most useful for APIs you depend on but do not control. You cannot run tests in their CI and they can change without telling you. These are the steps I would take next:
+
+* **Watch mode.** Add an API and its checks in the UI and let the scheduler run them. Most of it exists already. It would need a block on private and local addresses, so nobody can make the server call its own network (SSRF). It would also need a limit on how often each check runs and the sandbox around spec downloads.
+* **Alerts.** Nobody watches a dashboard all day. When a drift is seen for the first time, send an email, a Slack message or a webhook. The drift history already knows when a drift was first seen, so this is mostly a new Oban job.
+* **Auth.** Most real APIs need a key or a token. Each API would get its own headers, stored encrypted and never shown again after saving.

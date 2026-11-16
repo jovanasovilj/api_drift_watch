@@ -154,6 +154,10 @@ GitHub Actions runs all of them on every push. Formatting uses Styler.
 * Response headers and content types are not compared yet.
 * There is no UI to add an API or a check. The seeds add them.
 
+## How it evolved and what I learned
+
+My first plan was small. It had a demo API that breaks its own spec, a checker that runs on a schedule and a live dashboard. When I looked at real public APIs, their specs needed different work than I had planned, like YAML support and a way to handle a 14 MB spec. Two of the four APIs did not match their own spec, which showed me that the docs can be wrong just as often as the API. The plan also had an LLM that explains each drift, but I built a simpler compare page instead, where you paste a spec and a response. Letting people paste specs meant treating them as unsafe input, so I added limits for size, memory and time. While doing that I found a real bug in how specs were validated.
+
 ## Ideas for later
 
 This project is a showcase and stops here on purpose. If it became a real tool, it would be most useful for APIs you depend on but do not control. You cannot run tests in their CI and they can change without telling you. These are the steps I would take next:
